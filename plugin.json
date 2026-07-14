@@ -1,3 +1,7 @@
 {
-  "name": "neat-freak"
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "neat-freak",
+  "description": "Specialized in creating and auditing immaculately clean, neat, and minimalist codebase layouts.",
+  "version": "1.0.0",
+  "author": "Siemen van Gemert"
 }
