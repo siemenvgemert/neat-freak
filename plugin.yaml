@@ -1,0 +1,13 @@
+name: neat-freak
+version: 1.0.0
+description: Specialized in creating and auditing immaculately clean, neat, and minimalist codebase layouts.
+author: Siemen van Gemert
+provides_skills:
+  - neat-freak
+  - neat-freak-audit
+  - neat-freak-help
+  - neat-freak-review
+  - neat-freak-comfy
+  - neat-freak-debt
+  - neat-freak-inspect
+  - neat-freak-clean

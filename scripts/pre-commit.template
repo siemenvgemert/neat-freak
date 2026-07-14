@@ -1,0 +1,3 @@
+#!/bin/bash
+# neat-freak git pre-commit hook to verify folder structure constraints
+python3 scripts/pre_commit_check.py
