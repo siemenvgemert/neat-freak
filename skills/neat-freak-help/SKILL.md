@@ -37,6 +37,7 @@ Always build the simplest structure that satisfies the current requirements:
   - `// ponytail: simplified DB using inline query to avoid ORM boilerplate`
   - `# ponytail: using standard http.server to avoid external dependencies`
 - **Symmetry & Clutter-Free**: Avoid files in root except config and README. Keep nesting paths below 4 levels.
+- **Multi-Agent Isolation**: If multiple AI subagents run concurrently, they must write all temporary executions and scratch scripts inside role-isolated subdirectories inside `scratch/` (e.g. `scratch/researcher/`, `scratch/coder/`).
 
 #### 4. Intensity Modes
 Toggle the plugin intensity level dynamically or configure defaults:

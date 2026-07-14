@@ -43,6 +43,7 @@ neat-freak strictly enforces the rule: **"Build the absolute simplest layout tha
 4. **ponytail: Documentation**: Mark any intentional structural or functional simplifications with code comments so other developers (and agents) understand the choice:
    - `// ponytail: simplified router using standard multiplexer to avoid framework boilerplate`
    - `# ponytail: using sqlite inline queries to avoid SQL-Alchemy setup overhead`
+5. **Multi-Agent Isolation**: If multiple AI subagents run concurrently, they must write all temporary executions and scratch scripts inside role-isolated subdirectories inside `scratch/` (e.g. `scratch/researcher/`, `scratch/coder/`) to avoid context cross-talk and file locks.
 
 ---
 
@@ -52,6 +53,7 @@ The plugin bundles a custom Model Context Protocol (MCP) server that exposes hig
 
 - **`flatten_directory`**: Moves all files in a single-child nested directory up and deletes the empty parent folder.
 - **`prune_empty_folders`**: Recursively deletes all empty directories in the workspace (skipping .git folders).
+- **`clear_agent_sandbox`**: Deletes a specific agent's isolated subfolder inside the root `scratch/` directory.
 
 To enable this server, configure it in your `mcp_config.json` (see Installation section below).
 

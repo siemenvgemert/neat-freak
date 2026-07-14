@@ -71,6 +71,24 @@ def handle_tools_list(req_id):
                         },
                         "required": ["workspace_path"]
                     }
+                },
+                {
+                    "name": "clear_agent_sandbox",
+                    "description": "Deletes a specific agent's isolated subfolder inside the scratch/ directory.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "workspace_path": {
+                                "type": "string",
+                                "description": "Absolute path to the workspace root containing the scratch/ folder."
+                            },
+                            "sandbox_name": {
+                                "type": "string",
+                                "description": "The name of the agent subfolder to delete (e.g. 'researcher' or 'coder')."
+                            }
+                        },
+                        "required": ["workspace_path", "sandbox_name"]
+                    }
                 }
             ]
         }
@@ -141,6 +159,29 @@ def call_tool(name, arguments):
             return f"Successfully cleared the following files/folders from scratch/:\n" + "\n".join(cleared_items)
         except Exception as e:
             return f"Error clearing scratch directory: {str(e)}"
+    elif name == "clear_agent_sandbox":
+        ws_path = arguments.get("workspace_path")
+        sandbox_name = arguments.get("sandbox_name")
+        if not ws_path or not os.path.exists(ws_path):
+            return "Error: Workspace path does not exist."
+        if not sandbox_name:
+            return "Error: Sandbox name is required."
+        target_path = os.path.join(ws_path, "scratch", sandbox_name)
+        # Prevent directory traversal
+        resolved_target = os.path.abspath(target_path)
+        resolved_scratch = os.path.abspath(os.path.join(ws_path, "scratch"))
+        if not resolved_target.startswith(resolved_scratch) or resolved_target == resolved_scratch:
+            return "Error: Invalid sandbox name. Cannot delete directories outside of scratch/."
+        if not os.path.exists(target_path):
+            return f"Error: Sandbox folder '{sandbox_name}' does not exist inside scratch/."
+        try:
+            if os.path.isdir(target_path):
+                shutil.rmtree(target_path)
+            else:
+                os.remove(target_path)
+            return f"Successfully deleted agent sandbox folder: {sandbox_name}"
+        except Exception as e:
+            return f"Error clearing agent sandbox: {str(e)}"
     else:
         return f"Error: Tool {name} not found."
 
