@@ -101,6 +101,19 @@ neat-freak/
         └── SKILL.md
 ```
 
+## Intensity Modes
+
+You can dynamically toggle the plugin's intensity levels or configure default modes:
+
+- **`neat-freak off`**: Completely deactivates all layout checking.
+- **`neat-freak on`** (Default): Enforces standard layout guidelines (Tiers 0 and 1).
+- **`neat-freak ocd`**: Enforces strict modular layout symmetry (Tier 2 / Full OCD).
+
+### Configuration Priority
+1. **Environment Variable**: `NEAT_FREAK_DEFAULT_MODE` (values: `off`, `on`, `ocd`).
+2. **Local Configuration File**: `.neat-freak-config.json` placed in the root of your project directory containing `{"defaultMode": "on"}`.
+3. **Global Configuration File**: `~/.config/neat-freak/config.json` containing `{"defaultMode": "on"}`.
+
 ---
 
 ## Installation & Setup

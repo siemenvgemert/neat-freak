@@ -1,7 +1,9 @@
 ---
 name: neat-freak
-description: Specialized in creating immaculately clean, symmetrical, and minimalist folder structures for applications. Trigger this skill when the user wants to design an orderly repository, bootstrap a neat codebase, or keep their directory hierarchy completely free of clutter.
+description: Switch neat-freak intensity level (off/on/ocd)
 ---
+
+Switch to neat-freak {{args}} mode. If no mode is specified, default to "on". Persist this setting by writing {"defaultMode": "{{args}}"} to the project's local config file `.neat-freak-config.json` in the root of the workspace. If the mode is "off", deactivate all layout checks. If "on", enforce standard layout principles (Tiers 0 and 1). If "ocd", strictly enforce modular, symmetrical Full OCD structures (Tier 2).
 
 # Neat Freak Skill
 

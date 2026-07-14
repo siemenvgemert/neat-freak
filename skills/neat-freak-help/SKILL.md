@@ -37,3 +37,15 @@ Always build the simplest structure that satisfies the current requirements:
   - `// ponytail: simplified DB using inline query to avoid ORM boilerplate`
   - `# ponytail: using standard http.server to avoid external dependencies`
 - **Symmetry & Clutter-Free**: Avoid files in root except config and README. Keep nesting paths below 4 levels.
+
+#### 4. Intensity Modes
+Toggle the plugin intensity level dynamically or configure defaults:
+- **neat-freak off**: Deactivates all layout checks and allows any file structure.
+- **neat-freak on** (Default): Enforces standard layout guidelines (Tiers 0 and 1).
+- **neat-freak ocd**: Enforces strict modular layout symmetry (Tier 2).
+
+Configuration Resolution Order:
+1. Environment Variable: `NEAT_FREAK_DEFAULT_MODE` (off | on | ocd)
+2. Local Config file: `.neat-freak-config.json` at root containing `{"defaultMode": "on"}`
+3. Global Config file: `~/.config/neat-freak/config.json` containing `{"defaultMode": "on"}`
+
