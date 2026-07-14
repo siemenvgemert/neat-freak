@@ -38,6 +38,7 @@ Always build the simplest structure that satisfies the current requirements:
   - `# ponytail: using standard http.server to avoid external dependencies`
 - **Symmetry & Clutter-Free**: Avoid files in root except config and README. Keep nesting paths below 4 levels.
 - **Multi-Agent Isolation**: If multiple AI subagents run concurrently, they must write all temporary executions and scratch scripts inside role-isolated subdirectories inside `scratch/` (e.g. `scratch/researcher/`, `scratch/coder/`).
+- **File Naming Conventions**: Files must follow idiomatic naming casing: `snake_case` for Python/Rust, `kebab-case` for TS/JS/HTML/CSS (except PascalCase React components), and lowercase single words for Go. No redundant names (e.g. `models/user.py` not `models/user_model.py`).
 
 #### 4. Intensity Modes
 Toggle the plugin intensity level dynamically or configure defaults:

@@ -59,3 +59,8 @@ Use these blueprints as the foundation. Maintain the folder naming, typical conf
 - **Cross-Platform Compatibility**: Ensure configurations, scripts, and commands work on both Windows and Mac platforms (e.g. use standard npm scripts, cross-env if needed, avoid shell-specific constructs in makefiles where simple scripts or standard commands work).
 - **Explicit Exports/Imports**: Double check import/export declarations, package declarations, and paths to prevent syntax/module resolution errors.
 - **Sandbox / Scratchpad (Experimental Files & Multi-Agent Isolation)**: If you or the user write temporary tests, draft logic, or create experiment scripts, place them inside a root `scratch/` folder. If multiple AI subagents or teamwork pipelines are running concurrently, each agent MUST create its own isolated subfolder within `scratch/` named after its role or task ID (e.g., `scratch/researcher/` or `scratch/coder/`). All temporary files, draft scripts, and execution outputs must reside strictly within that subfolder. Always add `/scratch/` to the project `.gitignore`.
+- **File Naming Conventions**: All created files must use clean, idiomatic casing matching the tech stack:
+  - **Python / Rust**: `snake_case` (e.g., `config_loader.py`, `main.rs`).
+  - **Go**: Lowercase single words or short abbreviations (e.g., `main.go`, `router.go`). Avoid underscores.
+  - **TypeScript / JavaScript / HTML / CSS**: `kebab-case` (e.g., `app-router.ts`, `globals.css`), except for React components which use `PascalCase` (e.g., `UserCard.tsx`).
+  - **Descriptive & Non-Redundant**: Avoid repeating the parent folder's name (e.g., write `models/user.py` instead of `models/user_model.py`). Avoid generic names like `helper.py`, `stuff.ts`, or `scripts.js`.

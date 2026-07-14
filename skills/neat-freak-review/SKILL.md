@@ -22,6 +22,13 @@ Examine each new or moved file against these constraints:
 ### 3. Comment Documentation Check
 - Check if the agent applied the Ponytail simplicity rules. If any components or integrations were omitted/simplified, verify if they were documented with a `ponytail:` prefix comment in the code (e.g., `# ponytail: in-memory DB used to keep structure simple`).
 
+### 4. File Naming & Casing Check
+- **Casing Standards**: Check if the filenames follow tech stack conventions:
+  - Python/Rust: `snake_case` (e.g. `user_service.py`).
+  - Go: Lowercase single words (e.g. `router.go`).
+  - TS/JS/HTML/CSS: `kebab-case` (e.g. `user-card.ts`, `globals.css`), except React components (`PascalCase`).
+- **Description Quality**: Flag generic names (like `helper.py`, `stuff.ts`) or redundant names containing their parent folder (like `models/user_model.py` instead of `models/user.py`).
+
 ---
 
 ## Review Output Format
@@ -40,5 +47,6 @@ Provide a neat markdown table listing all new or modified files and their placem
 - `[ ]` Directory nesting is 4 levels or shallower.
 - `[ ]` No single-file folders exist.
 - `[ ]` Any layout simplifications are documented with `ponytail:` comments.
+- `[ ]` Filenames follow tech stack casing standards and use descriptive names.
 
 If any file fails the review, recommend the exact moves (e.g., `mv` commands) required to clean up the workspace before the user commits their changes.

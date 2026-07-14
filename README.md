@@ -44,6 +44,7 @@ neat-freak strictly enforces the rule: **"Build the absolute simplest layout tha
    - `// ponytail: simplified router using standard multiplexer to avoid framework boilerplate`
    - `# ponytail: using sqlite inline queries to avoid SQL-Alchemy setup overhead`
 5. **Multi-Agent Isolation**: If multiple AI subagents run concurrently, they must write all temporary executions and scratch scripts inside role-isolated subdirectories inside `scratch/` (e.g. `scratch/researcher/`, `scratch/coder/`) to avoid context cross-talk and file locks.
+6. **File Naming Conventions**: All created files must follow clean, stack-idiomatic casing: `snake_case` for Python/Rust, `kebab-case` for TS/JS/HTML/CSS (except PascalCase React components), and lowercase single words for Go. Generic names (like `helper.js`) or repeating the parent directory's name (like `models/user_model.py`) are strictly prohibited.
 
 ---
 
