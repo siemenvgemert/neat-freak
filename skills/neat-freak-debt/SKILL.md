@@ -1,26 +1,25 @@
 ---
 name: neat-freak-debt
-description: Scans the codebase to harvest and document all neat-freak and ponytail layout simplification comments, compiling them into a structured tracking ledger. Trigger this skill when the user wants to audit their technical layout debt or view simplified shortcuts.
+description: Scans codebase for ponytail and neat-freak simplification comments, compiling a Layout Debt Ledger (layout_debt.md).
 ---
 
 # Neat Freak Debt Skill
 
 You are a technical debt inspector. When this skill is active, you MUST scan the source code of the project workspace to identify and compile all comments documenting simplified layout choices.
 
-## Workflow
+## Fast-Path Execution (1-Turn)
 
-### 1. Scan for Comments
-Scan all source files in the workspace (excluding build folders and dependencies like `node_modules/`, `target/`, `.venv/`) for comments matching these pattern markers:
-- `// ponytail:` / `# ponytail:`
+### 1. Run the Layout Debt Harvester
+Execute the dedicated high-speed debt harvester:
+- **CLI Fast-Path (Recommended)**: Run `python ~/.gemini/config/plugins/neat-freak/scripts/harvest_debt.py --write`
+- **MCP Fast-Path**: Call `harvest_debt(workspace_path="...", write_file=True)`
+
+The script scans all workspace source files in milliseconds for:
+- `// ponytail:` / `# ponytail:` / `/* ponytail:`
 - `// neat-freak:` / `# neat-freak:`
 
-Extract:
-- The path of the file containing the comment.
-- The line number of the comment.
-- The text content describing the simplification choice.
-
-### 2. Generate the Layout Debt Ledger
-Compile the results into a file named `layout_debt.md` at the root of the workspace directory. Use the following markdown structure:
+### 2. Output and Ledger File
+The harvester extracts the file path, line number, and simplification rationale, automatically creating or updating `layout_debt.md` in the root of the workspace:
 
 ```markdown
 # Layout Debt Ledger
@@ -31,8 +30,7 @@ This file tracks all intentional architecture and implementation simplifications
 
 | File Path | Line | Description |
 |---|---|---|
-| *e.g., `app.py`* | 12 | using standard library http.server to avoid external dependencies |
-| *e.g., `main.go`* | 45 | inline sql query used to bypass ORM boilerplate setup |
+| `app.py` | 12 | using standard library http.server to avoid external dependencies |
 ```
 
-If no layout debt comments are found, document that the codebase has zero recorded layout simplification debt.
+If zero comments are found, it records that the codebase has zero recorded layout simplification debt. Present the ledger summary directly to the user.

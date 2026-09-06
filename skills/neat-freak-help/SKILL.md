@@ -1,6 +1,6 @@
 ---
 name: neat-freak-help
-description: Displays a quick reference card and cheatsheet for the neat-freak plugin, detailing the three simplicity tiers, file organization principles, and available skills. Trigger this skill when the user asks for help or commands related to neat-freak.
+description: Displays a quick reference card and cheatsheet for the neat-freak plugin, architecture tiers, guidelines, and commands.
 ---
 
 # Neat Freak Help Skill
@@ -13,10 +13,10 @@ Renders the following quick reference card directly to the user:
 
 ### Neat Freak Cheat Sheet
 
-#### 1. Available Custom Skills
+#### 1. Available Custom Skills (Optimized for 1-Turn Execution)
 - **`neat-freak`**: Bootstraps neat, minimalist workspace structures using stack reference templates.
-- **`neat-freak-audit`**: Checks the workspace for empty folders, deep nesting, and clutter, and generates a scorecard.
-- **`neat-freak-review`**: Evaluates new/modified files to check if they conform to the folder guidelines.
+- **`neat-freak-audit`**: Checks the workspace for empty folders, deep nesting, and clutter; outputs a 0-100 scorecard.
+- **`neat-freak-review`**: Evaluates new/modified files to verify layout compliance before commits.
 - **`neat-freak-comfy`**: Audits the repository layout to optimize search speed and minimize token costs for AI agents.
 - **`neat-freak-debt`**: Scans the codebase to harvest and document all neat-freak and ponytail layout simplification comments in `layout_debt.md`.
 - **`neat-freak-inspect`**: Scans import statements and dependencies to check for architectural coupling, circular dependencies, or layer violations.
@@ -36,18 +36,17 @@ Always build the simplest structure that satisfies the current requirements:
 - **`ponytail:` Comments:** Document any intentional code/library simplifications with a code comment:
   - `// ponytail: simplified DB using inline query to avoid ORM boilerplate`
   - `# ponytail: using standard http.server to avoid external dependencies`
-- **Symmetry & Clutter-Free**: Avoid files in root except config and README. Keep nesting paths below 4 levels.
-- **Multi-Agent Isolation**: If multiple AI subagents run concurrently, they must write all temporary executions and scratch scripts inside role-isolated subdirectories inside `scratch/` (e.g. `scratch/researcher/`, `scratch/coder/`).
-- **File Naming Conventions**: Files must follow idiomatic naming casing: `snake_case` for Python/Rust, `kebab-case` for TS/JS/HTML/CSS (except PascalCase React components), and lowercase single words for Go. No redundant names (e.g. `models/user.py` not `models/user_model.py`).
+- **Symmetry & Clutter-Free**: Avoid files in root except config and README. Keep nesting paths below 4 levels (3 in OCD).
+- **Multi-Agent Isolation**: Multiple AI subagents must write temporary files strictly into role-isolated subdirectories inside `scratch/` (e.g. `scratch/researcher/`).
+- **File Naming Conventions**: Files must follow idiomatic naming casing: `snake_case` for Python/Rust, `kebab-case` for TS/JS/HTML/CSS (except PascalCase React components), and lowercase single words for Go.
 
-#### 4. Intensity Modes
-Toggle the plugin intensity level dynamically or configure defaults:
-- **neat-freak off**: Deactivates all layout checks and allows any file structure.
+#### 4. High-Speed CLI Helpers (1-Turn Instant Response)
+- `python scripts/audit_workspace.py` : Run workspace cleanliness audit (<20ms)
+- `python scripts/harvest_debt.py -w` : Harvest ponytail debt comments into `layout_debt.md` (<15ms)
+- `python scripts/inspect_deps.py` : Scan AST and check for circular dependencies / layer violations (<30ms)
+- `python scripts/pre_commit_check.py -t -w` : Verify modified files in working tree (<15ms)
+
+#### 5. Intensity Modes
+- **neat-freak off**: Deactivates all layout checks.
 - **neat-freak on** (Default): Enforces standard layout guidelines (Tiers 0 and 1).
-- **neat-freak ocd**: Enforces strict modular layout symmetry (Tier 2).
-
-Configuration Resolution Order:
-1. Environment Variable: `NEAT_FREAK_DEFAULT_MODE` (off | on | ocd)
-2. Local Config file: `.neat-freak-config.json` at root containing `{"defaultMode": "on"}`
-3. Global Config file: `~/.config/neat-freak/config.json` containing `{"defaultMode": "on"}`
-
+- **neat-freak ocd**: Enforces strict modular layout symmetry (Tier 2, max depth 3).

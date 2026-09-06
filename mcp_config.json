@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "neat-freak-mcp": {
-      "command": "python3",
-      "args": ["/Users/siemenvangemert/Documents/GitHub/neat-freak/mcp/neat_freak_mcp.py"]
+      "command": "python",
+      "args": ["C:\\Users\\sieme\\.gemini\\config\\plugins\\neat-freak\\mcp\\neat_freak_mcp.py"]
     }
   }
 }

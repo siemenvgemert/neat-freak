@@ -1,37 +1,39 @@
 ---
 name: neat-freak-audit
-description: Audits the current repository/workspace for messy file structures, empty folders, misplaced files, bloated boilerplates, or deviations from the Neat Freak principles. Trigger this skill when the user asks to review repo cleanliness, check for folder clutter, or do a structural audit.
+description: Audits workspace for messy structures, empty folders, stray files, and excessive nesting. Returns a 0-100 Cleanliness Scorecard.
 ---
 
 # Neat Freak Audit Skill
 
-You are a meticulous auditor specialized in maintaining neat, clutter-free, and highly organized repositories. When this skill is active, you MUST follow this workflow to inspect the workspace and generate a Cleanliness Scorecard.
+You are a meticulous auditor specialized in maintaining neat, clutter-free, and highly organized repositories. When this skill is active, you MUST follow this fast 1-turn workflow to generate a Cleanliness Scorecard.
 
-## Audit Workflow
+## Fast-Path Execution (1-Turn)
 
-### 1. Scan the Workspace
-Perform a full inspection of the current workspace directory using your file listing and search tools. Inspect for the following:
-- **Empty Directories**: Identify any folders that contain no files (recursively).
-- **Single-Item Folders**: Look for directories that contain only a single subdirectory or file. These are often candidates for flattening.
-- **Excessive Nesting**: Check for folder nesting paths deeper than 4 levels. Verify if they are strictly necessary (YAGNI).
-- **Stray Files**: Identify source files or temporary files sitting in the root folder instead of standard directories (e.g. `src/`, `lib/`, `tests/`).
-- **Unignored Build Artifacts**: Find files/folders like `node_modules/`, `__pycache__/`, `target/`, or `.DS_Store` that are not documented in `.gitignore`.
-- **Boilerplate Duplication**: Look for unnecessary config files (e.g. separate tsconfigs for subfolders when one root config is sufficient).
+### 1. Run the Workspace Auditor
+Execute the dedicated high-speed audit script or MCP tool:
+- **CLI Fast-Path (Recommended)**: Run `python ~/.gemini/config/plugins/neat-freak/scripts/audit_workspace.py` (or relative path to workspace).
+- **MCP Fast-Path**: Call `audit_workspace(workspace_path="...")`.
 
-### 2. Generate the Cleanliness Scorecard
-Produce a clear report containing the following sections:
+The script traverses the workspace using high-speed `os.scandir` in under 30ms and evaluates:
+- **Empty Directories**: Identifies folders with zero files.
+- **Single-Item Folders**: Detects unnecessary single-child folders that should be flattened.
+- **Excessive Nesting**: Verifies nesting paths stay within limits (<=4 in Standard mode, <=3 in OCD mode).
+- **Stray Root Files**: Detects source code files placed in the root directory.
+- **Unignored Build Artifacts**: Checks for cache/build directories missing from `.gitignore`.
+- **Boilerplate Duplication**: Detects redundant nested config files.
 
-#### A. Cleanliness Score
-Give the repository a score out of 100 based on the volume of clutter:
-- **90-100 (Immaculate):** Symmetrical, minimal nesting, zero empty folders, zero stray files.
-- **70-89 (Neat but Expandable):** Mostly organized, some small files in root, some single-item folders.
-- **Below 70 (Cluttered):** Multiple empty folders, deep nesting, missing `.gitignore` rules, misplaced files.
+### 2. Present the Cleanliness Scorecard
+Present the output returned by the auditor directly to the user:
 
-#### B. Identified Structural Issues
-List all identified violations in a clean markdown table:
+#### A. Cleanliness Score & Rating
+- **90-100 (Immaculate)**: Symmetrical, minimal nesting, zero empty folders, zero stray files.
+- **70-89 (Neat but Expandable)**: Minor single-child folders or easily resolved clutter.
+- **Below 70 (Cluttered)**: Multiple empty folders, deep nesting, missing `.gitignore` rules, or misplaced files.
+
+#### B. Identified Structural Issues Table
 | Issue Type | File/Folder Path | Description | Recommended Action |
 |---|---|---|---|
-| *e.g., Stray File* | `file:///path/to/main.py` | Sit directly in root | Move to `/app/main.py` |
+| *e.g., Stray File* | `app.py` | Sits directly in root | Move to `src/app.py` |
 
 #### C. Prioritized Cleanup Action Plan
-Suggest a list of commands (e.g. `mv`, `rmdir`) or edits to clean up the repository. Always ask for user confirmation before executing any cleanup steps.
+Present the recommended moves, flattens, or deletions. Always confirm with the user before executing destructive file operations.

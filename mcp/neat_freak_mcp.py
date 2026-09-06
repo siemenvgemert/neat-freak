@@ -3,8 +3,23 @@ import json
 import os
 import shutil
 
+# Ensure scripts directory is in sys.path for direct module reuse
+SCRIPTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "scripts"))
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
+
+try:
+    import audit_workspace
+    import harvest_debt
+    import inspect_deps
+    import pre_commit_check
+except ImportError:
+    audit_workspace = None
+    harvest_debt = None
+    inspect_deps = None
+    pre_commit_check = None
+
 def log(msg):
-    # Print to stderr for logging/debugging (does not interfere with stdout JSON-RPC)
     sys.stderr.write(f"LOG: {msg}\n")
     sys.stderr.flush()
 
@@ -19,7 +34,7 @@ def handle_initialize(req_id, params):
             },
             "serverInfo": {
                 "name": "neat-freak-mcp",
-                "version": "1.0.0"
+                "version": "1.1.0"
             }
         }
     }
@@ -30,6 +45,76 @@ def handle_tools_list(req_id):
         "id": req_id,
         "result": {
             "tools": [
+                {
+                    "name": "audit_workspace",
+                    "description": "Performs an instantaneous cleanliness audit of the workspace using fast os.scandir traversal, returning a 0-100 Cleanliness Scorecard and cleanup plan in 1 turn.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "workspace_path": {
+                                "type": "string",
+                                "description": "Absolute path to the workspace root to audit."
+                            },
+                            "mode": {
+                                "type": "string",
+                                "description": "Intensity mode ('on', 'ocd', or 'off'). Defaults to configured project mode.",
+                                "enum": ["on", "ocd", "off"]
+                            }
+                        },
+                        "required": ["workspace_path"]
+                    }
+                },
+                {
+                    "name": "harvest_debt",
+                    "description": "Harvests all ponytail and neat-freak simplification comments across all workspace source files in milliseconds, compiling a structured Layout Debt Ledger.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "workspace_path": {
+                                "type": "string",
+                                "description": "Absolute path to the workspace root to scan."
+                            },
+                            "write_file": {
+                                "type": "boolean",
+                                "description": "Whether to write the ledger directly to layout_debt.md in the workspace root. Default is false."
+                            }
+                        },
+                        "required": ["workspace_path"]
+                    }
+                },
+                {
+                    "name": "inspect_dependencies",
+                    "description": "Analyzes import statements via Python AST and multi-language parsers to detect circular dependencies and layer boundary violations in milliseconds.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "workspace_path": {
+                                "type": "string",
+                                "description": "Absolute path to the workspace root to analyze."
+                            }
+                        },
+                        "required": ["workspace_path"]
+                    }
+                },
+                {
+                    "name": "review_layout",
+                    "description": "Reviews new, modified, or staged files against neat-freak placement guidelines (no root source files, nesting limits) returning a PASS/FAIL table.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "workspace_path": {
+                                "type": "string",
+                                "description": "Absolute path to the workspace root."
+                            },
+                            "files": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Optional list of specific relative file paths to evaluate. If omitted, evaluates working tree changes."
+                            }
+                        },
+                        "required": ["workspace_path"]
+                    }
+                },
                 {
                     "name": "flatten_directory",
                     "description": "Moves all files in a single-child nested directory up and deletes the empty parent folder.",
@@ -46,7 +131,7 @@ def handle_tools_list(req_id):
                 },
                 {
                     "name": "prune_empty_folders",
-                    "description": "Recursively deletes all empty directories in the workspace (skipping .git folders).",
+                    "description": "Recursively deletes all empty directories in the workspace using high-speed traversal (skipping .git folders).",
                     "inputSchema": {
                         "type": "object",
                         "properties": {
@@ -95,13 +180,68 @@ def handle_tools_list(req_id):
     }
 
 def call_tool(name, arguments):
-    if name == "flatten_directory":
+    if name == "audit_workspace":
+        ws_path = arguments.get("workspace_path")
+        if not ws_path or not os.path.exists(ws_path):
+            return "Error: Workspace path does not exist."
+        mode = arguments.get("mode") or (audit_workspace.resolve_mode(ws_path) if audit_workspace else "on")
+        if audit_workspace:
+            res = audit_workspace.scan_workspace(ws_path, mode)
+            return audit_workspace.format_markdown(res)
+        return "Error: audit_workspace module not available."
+
+    elif name == "harvest_debt":
+        ws_path = arguments.get("workspace_path")
+        if not ws_path or not os.path.exists(ws_path):
+            return "Error: Workspace path does not exist."
+        write_file = arguments.get("write_file", False)
+        if harvest_debt:
+            records = harvest_debt.harvest_debt(ws_path)
+            content = harvest_debt.format_markdown(records)
+            if write_file:
+                out_path = os.path.join(ws_path, "layout_debt.md")
+                with open(out_path, "w", encoding="utf-8") as f:
+                    f.write(content + "\n")
+                return f"Successfully updated {out_path} ({len(records)} entries found):\n\n" + content
+            return content
+        return "Error: harvest_debt module not available."
+
+    elif name == "inspect_dependencies":
+        ws_path = arguments.get("workspace_path")
+        if not ws_path or not os.path.exists(ws_path):
+            return "Error: Workspace path does not exist."
+        if inspect_deps:
+            res = inspect_deps.inspect_dependencies(ws_path)
+            return inspect_deps.format_markdown(res)
+        return "Error: inspect_deps module not available."
+
+    elif name == "review_layout":
+        ws_path = arguments.get("workspace_path")
+        if not ws_path or not os.path.exists(ws_path):
+            return "Error: Workspace path does not exist."
+        files = arguments.get("files")
+        if pre_commit_check:
+            mode = pre_commit_check.resolve_mode(ws_path)
+            if not files:
+                files = pre_commit_check.get_git_files(working_tree=True)
+            results = pre_commit_check.check_files(files, mode)
+            lines = [f"### Neat Freak Placement Review (Mode: {mode.upper()})\n"]
+            if not results:
+                lines.append("No modified files detected to review.")
+            else:
+                lines.append("| File Path | Status | Finding / Recommendation |")
+                lines.append("|---|---|---|")
+                for r in results:
+                    lines.append(f"| `{r['file']}` | **{r['status']}** | {r['reason']} |")
+            return "\n".join(lines)
+        return "Error: pre_commit_check module not available."
+
+    elif name == "flatten_directory":
         dir_path = arguments.get("directory_path")
         if not dir_path or not os.path.exists(dir_path):
             return "Error: Directory path does not exist."
         try:
-            children = os.listdir(dir_path)
-            children = [c for c in children if c != '.DS_Store']
+            children = [c for c in os.listdir(dir_path) if c != '.DS_Store']
             if len(children) != 1:
                 return "Error: Directory does not contain exactly one child folder."
             child_name = children[0]
@@ -114,30 +254,40 @@ def call_tool(name, arguments):
             return f"Successfully flattened {child_name} into {dir_path}"
         except Exception as e:
             return f"Error flattening directory: {str(e)}"
+
     elif name == "prune_empty_folders":
         ws_path = arguments.get("workspace_path")
         if not ws_path or not os.path.exists(ws_path):
             return "Error: Workspace path does not exist."
         try:
             pruned = []
-            for root, dirs, files in os.walk(ws_path, topdown=False):
-                # Skip .git paths
-                parts = root.split(os.sep)
-                if '.git' in parts:
-                    continue
-                items = os.listdir(root)
-                items = [i for i in items if i != '.DS_Store']
-                if len(items) == 0:
-                    ds_store = os.path.join(root, '.DS_Store')
-                    if os.path.exists(ds_store):
-                        os.remove(ds_store)
-                    os.rmdir(root)
-                    pruned.append(root)
-            if len(pruned) == 0:
+            # Fast post-order traversal using os.scandir
+            def clean_empty_dirs(path):
+                try:
+                    entries = list(os.scandir(path))
+                except (PermissionError, FileNotFoundError):
+                    return
+                for e in entries:
+                    if e.is_dir(follow_symlinks=False) and e.name != ".git":
+                        clean_empty_dirs(e.path)
+                try:
+                    remaining = [e.name for e in os.scandir(path) if e.name != ".DS_Store"]
+                    if not remaining and path != ws_path:
+                        ds_store = os.path.join(path, ".DS_Store")
+                        if os.path.exists(ds_store):
+                            os.remove(ds_store)
+                        os.rmdir(path)
+                        pruned.append(path.replace("\\", "/"))
+                except Exception:
+                    pass
+
+            clean_empty_dirs(ws_path)
+            if not pruned:
                 return "No empty directories found."
             return "Successfully deleted the following empty folders:\n" + "\n".join(pruned)
         except Exception as e:
             return f"Error pruning empty folders: {str(e)}"
+
     elif name == "clear_scratch_directory":
         ws_path = arguments.get("workspace_path")
         if not ws_path or not os.path.exists(ws_path):
@@ -154,11 +304,12 @@ def call_tool(name, arguments):
                 else:
                     os.remove(item_path)
                 cleared_items.append(item)
-            if len(cleared_items) == 0:
+            if not cleared_items:
                 return "scratch/ directory was already empty."
             return f"Successfully cleared the following files/folders from scratch/:\n" + "\n".join(cleared_items)
         except Exception as e:
             return f"Error clearing scratch directory: {str(e)}"
+
     elif name == "clear_agent_sandbox":
         ws_path = arguments.get("workspace_path")
         sandbox_name = arguments.get("sandbox_name")
@@ -167,7 +318,6 @@ def call_tool(name, arguments):
         if not sandbox_name:
             return "Error: Sandbox name is required."
         target_path = os.path.join(ws_path, "scratch", sandbox_name)
-        # Prevent directory traversal
         resolved_target = os.path.abspath(target_path)
         resolved_scratch = os.path.abspath(os.path.join(ws_path, "scratch"))
         if not resolved_target.startswith(resolved_scratch) or resolved_target == resolved_scratch:
@@ -203,7 +353,7 @@ def handle_tools_call(req_id, params):
     }
 
 def main():
-    log("neat-freak-mcp server started")
+    log("neat-freak-mcp server started (v1.1.0)")
     while True:
         line = sys.stdin.readline()
         if not line:
@@ -221,8 +371,10 @@ def main():
                 resp = handle_tools_list(req_id)
             elif method == "tools/call":
                 resp = handle_tools_call(req_id, params)
+            elif method == "ping":
+                resp = {"jsonrpc": "2.0", "id": req_id, "result": {}}
             
-            if resp:
+            if resp and req_id is not None:
                 sys.stdout.write(json.dumps(resp) + "\n")
                 sys.stdout.flush()
         except Exception as e:

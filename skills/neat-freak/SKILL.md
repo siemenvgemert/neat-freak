@@ -1,9 +1,12 @@
 ---
 name: neat-freak
-description: Switch neat-freak intensity level (off/on/ocd)
+description: Bootstrap clean, minimalist codebase layouts (Tiers 0-2) or switch neat-freak intensity mode (off/on/ocd).
 ---
 
-Switch to neat-freak {{args}} mode. If no mode is specified, default to "on". Persist this setting by writing {"defaultMode": "{{args}}"} to the project's local config file `.neat-freak-config.json` in the root of the workspace. If the mode is "off", deactivate all layout checks. If "on", enforce standard layout principles (Tiers 0 and 1). If "ocd", strictly enforce modular, symmetrical Full OCD structures (Tier 2).
+Switch to neat-freak {{args}} mode if specified. If no mode is specified, default to "on". Persist this setting by writing `{"defaultMode": "{{args}}"}` to the project's local config file `.neat-freak-config.json` in the root of the workspace.
+- **off**: Deactivate all layout checks.
+- **on** (Default): Enforce standard layout principles (Tiers 0 and 1).
+- **ocd**: Strictly enforce modular, symmetrical Full OCD structures (Tier 2, max nesting depth 3).
 
 # Neat Freak Skill
 
@@ -18,25 +21,70 @@ Before writing any files, ask: **"Does this codebase, directory, or file need to
 - **Tier 2 (Full OCD):** A standard structured application as defined in the blueprints, used only when the codebase requires modular expansion or multi-person teamwork.
 
 ### 2. Propose the Directory Map (ASCII Tree)
-Present a detailed ASCII folder structure tree to the user first. Clearly highlight any files or folders that were excluded for simplicity with a `(YAGNI)` label. For example:
-```text
-my-app/
-├── cmd/
-│   └── app/
-│       └── main.go
-├── go.mod
-└── README.md
-```
+Present a detailed ASCII folder structure tree to the user first. Clearly highlight any files or folders that were excluded for simplicity with a `(YAGNI)` label.
 Explain the purpose of each directory and key configuration file, explaining why it is as lean as possible.
 
-### 3. Read the Reference Blueprint
-Depending on the tech stack chosen, you MUST dynamically read the corresponding reference blueprint from the `references/` subdirectory of this skill to see both the Standard and the Ponytail-Lite architectures:
-- **Python**: Read `references/python.md`
-- **TypeScript/Next.js**: Read `references/typescript_nextjs.md`
-- **Go**: Read `references/go.md`
-- **Rust**: Read `references/rust.md`
+### 3. Fast-Path Stack Blueprints (Zero-Roundtrip Reference)
+Use these fast-path blueprints directly to generate layouts without extra file reads. (Deep-dive manuals are available in `references/` if needed).
 
-Use these blueprints as the foundation. Maintain the folder naming, typical configuration settings, testing setups, and entry points defined within them.
+#### Python Fast-Path
+- **Tier 0**: `script.py` (standard library only)
+- **Tier 1**: `app.py`, `requirements.txt`, `README.md`, `.gitignore`
+- **Tier 2 (OCD)**:
+  ```text
+  project/
+  ├── app/
+  │   ├── __init__.py
+  │   ├── main.py          # Entry point & CLI / server
+  │   ├── config.py        # Settings & environment
+  │   └── core/            # Business logic
+  ├── tests/
+  ├── pyproject.toml
+  ├── .gitignore
+  └── README.md
+  ```
+
+#### TypeScript / Next.js Fast-Path
+- **Tier 0**: `index.html` or `server.ts` (using standard fetch / node:http)
+- **Tier 1**: `src/index.ts`, `package.json`, `tsconfig.json`, `README.md`
+- **Tier 2 (OCD Next.js App Router)**:
+  ```text
+  project/
+  ├── app/                 # Routes only
+  │   ├── layout.tsx
+  │   └── page.tsx
+  ├── components/          # Reusable UI (PascalCase)
+  ├── lib/                 # Core utilities & database
+  ├── package.json
+  ├── tsconfig.json
+  └── README.md
+  ```
+
+#### Go Fast-Path
+- **Tier 0**: `main.go`
+- **Tier 1**: `main.go`, `go.mod`, `README.md`
+- **Tier 2 (OCD)**:
+  ```text
+  project/
+  ├── cmd/app/main.go      # Binary entry points
+  ├── internal/            # Private application code
+  ├── go.mod
+  └── README.md
+  ```
+
+#### Rust Fast-Path
+- **Tier 0**: `main.rs` (via rustc)
+- **Tier 1**: `src/main.rs`, `Cargo.toml`, `README.md`
+- **Tier 2 (OCD)**:
+  ```text
+  project/
+  ├── src/
+  │   ├── main.rs
+  │   ├── lib.rs
+  │   └── config.rs
+  ├── Cargo.toml
+  └── README.md
+  ```
 
 ### 4. Create the Workspace & Directories
 1. Ensure the user has selected or defined an active workspace. If they haven't, recommend they set a subdirectory inside `~/.gemini/antigravity/scratch/` as their active workspace.
@@ -52,15 +100,14 @@ Use these blueprints as the foundation. Maintain the folder naming, typical conf
 ## Scaffolding & Ponytail Principles
 - **YAGNI (You Aren't Gonna Need It):** Never add folders, files, or boilerplate that the current requirement does not actively demand.
 - **Favor Standard Libraries & Native Features:** Avoid external dependencies unless they are absolutely required for the core function of the app.
-- **Mark intentional simplifications with a `ponytail:` comment:** When you choose a simpler path (e.g. omitting an ORM, omitting a router library, or writing a single-file implementation), document it in the source code with a comment like:
+- **Mark intentional simplifications with a `ponytail:` comment:** When you choose a simpler path, document it in the source code with a comment like:
   - `// ponytail: simplified DB access using inline SQL to avoid ORM boilerplate`
   - `# ponytail: using standard library http.server to avoid external dependencies`
-- **No Placeholders**: Write fully working, syntactic boilerplate. Avoid `// TODO: implement`. Provide simple but working mock implementations (e.g. in-memory databases or mock repositories) to ensure code compiles and runs.
-- **Cross-Platform Compatibility**: Ensure configurations, scripts, and commands work on both Windows and Mac platforms (e.g. use standard npm scripts, cross-env if needed, avoid shell-specific constructs in makefiles where simple scripts or standard commands work).
-- **Explicit Exports/Imports**: Double check import/export declarations, package declarations, and paths to prevent syntax/module resolution errors.
-- **Sandbox / Scratchpad (Experimental Files & Multi-Agent Isolation)**: If you or the user write temporary tests, draft logic, or create experiment scripts, place them inside a root `scratch/` folder. If multiple AI subagents or teamwork pipelines are running concurrently, each agent MUST create its own isolated subfolder within `scratch/` named after its role or task ID (e.g., `scratch/researcher/` or `scratch/coder/`). All temporary files, draft scripts, and execution outputs must reside strictly within that subfolder. Always add `/scratch/` to the project `.gitignore`.
-- **File Naming Conventions**: All created files must use clean, idiomatic casing matching the tech stack:
+- **No Placeholders**: Write fully working, syntactic boilerplate. Avoid `// TODO: implement`. Provide simple but working mock implementations to ensure code compiles and runs.
+- **Cross-Platform Compatibility**: Ensure configurations, scripts, and commands work on both Windows and POSIX platforms.
+- **Sandbox / Scratchpad (Multi-Agent Isolation)**: If writing temporary tests or experimental code, place them inside a root `scratch/` folder. If multiple AI subagents run concurrently, each agent MUST create its own isolated subfolder within `scratch/` named after its role (e.g. `scratch/researcher/`). Always add `/scratch/` to `.gitignore`.
+- **File Naming Conventions**:
   - **Python / Rust**: `snake_case` (e.g., `config_loader.py`, `main.rs`).
-  - **Go**: Lowercase single words or short abbreviations (e.g., `main.go`, `router.go`). Avoid underscores.
-  - **TypeScript / JavaScript / HTML / CSS**: `kebab-case` (e.g., `app-router.ts`, `globals.css`), except for React components which use `PascalCase` (e.g., `UserCard.tsx`).
-  - **Descriptive & Non-Redundant**: Avoid repeating the parent folder's name (e.g., write `models/user.py` instead of `models/user_model.py`). Avoid generic names like `helper.py`, `stuff.ts`, or `scripts.js`.
+  - **Go**: Lowercase single words or short abbreviations (e.g., `main.go`, `router.go`).
+  - **TypeScript / JavaScript / HTML / CSS**: `kebab-case` (e.g., `app-router.ts`, `globals.css`), except React components (`PascalCase`).
+  - **Descriptive & Non-Redundant**: Avoid repeating parent folder names (write `models/user.py` not `models/user_model.py`).

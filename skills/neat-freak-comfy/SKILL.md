@@ -1,50 +1,49 @@
 ---
 name: neat-freak-comfy
-description: Audits the repository to check how well it is structured for AI agents, optimizing folder layouts and configurations to reduce token costs, limit search overhead, and minimize directory-traversal hops. Trigger this skill when the user wants to make their codebase LLM-friendly, reduce agent cost, or improve speed.
+description: Audits repository layout to optimize search speed, minimize token costs, and reduce directory hops for AI agents.
 ---
 
 # Neat Freak Comfy Skill
 
-You are an expert in LLM Token Economy and Agentic Developer Experience (DX). When this skill is active, you MUST inspect the codebase's folder structure, configurations, and metadata to check how "comfortable" it is for an AI assistant to navigate and edit.
+You are an expert in LLM Token Economy and Agentic Developer Experience (DX). When this skill is active, you MUST inspect the codebase's folder structure, configurations, and metadata to evaluate how "comfortable" and token-efficient it is for AI assistants like Gemini 3.8 Flash.
 
-## AI Friendliness Guidelines
+## Fast-Path Execution (1-Turn)
 
-Inspect the workspace and evaluate it based on the following AI-friendliness metrics:
+### 1. Run the Workspace Auditor for Diagnostic Telemetry
+Run `python ~/.gemini/config/plugins/neat-freak/scripts/audit_workspace.py` (or call MCP `audit_workspace`). It automatically measures unignored build folders, single-child folders, and nesting depth in milliseconds.
 
-### 1. Token Waste Check (Exclusion Filters)
-- **Problem:** If build folders (`node_modules/`, `.next/`, `target/`, `.venv/`), temporary caches, or package lockfiles are not correctly listed in `.gitignore`, agentic search tools (like `grep_search` or `find`) will parse them recursively. This wastes massive amounts of context tokens, slows down responses, and causes search timeouts.
-- **Rule:** Verify `.gitignore` is present and contains comprehensive rules for the target stack.
+### 2. Evaluate AI Friendliness Metrics
 
-### 2. Traversal Hops Check (Nesting Depth)
-- **Problem:** Agents must run a `list_dir` tool call for every folder level they traverse. Nesting deeper than 3 levels forces the agent to make multiple sequential tool calls just to find a file.
-- **Rule:** Check if nesting exceeds 3 levels and check for single-file folders that require a tool hop to access.
+#### A. Token Waste Check (Exclusion Filters)
+- **Problem**: If build folders (`node_modules/`, `.next/`, `target/`, `.venv/`), caches, or package lockfiles are not listed in `.gitignore`, agentic search tools (`grep_search`, `find_by_name`) parse them recursively, consuming massive token context and causing slow responses.
+- **Rule**: Ensure `.gitignore` comprehensively ignores build artifacts and caches.
 
-### 3. Discoverability Check (Layout Indexes)
-- **Problem:** When an agent enters a new repository, it must understand the project layout. If it has to run `list_dir` recursively across the whole repo, it uses a large chunk of its context window.
-- **Rule:** Check if the root `README.md` contains a clear ASCII directory map explaining where components live, allowing the agent to load the layout in a single file read.
+#### B. Traversal Hops Check (Nesting Depth)
+- **Problem**: Each folder level forces agents to make sequential `list_dir` tool calls. Deep nesting (>3 levels) creates round-trip latency.
+- **Rule**: Keep application code shallow (<=3 hops). Flatten single-child intermediary folders.
 
-### 4. File Fragmentation (Tool Call Overheads)
-- **Problem:** Reading 10 small files (under 15 lines each) requires 10 separate `view_file` calls, wasting time and tool-call overhead.
-- **Rule:** Check if utilities or routers are over-fragmented. Recommend consolidation where logical.
+#### C. Discoverability Check (Layout Indexes)
+- **Problem**: When entering a repository without a map, agents burn context exploring directories.
+- **Rule**: Verify that `README.md` includes a clear ASCII tree map of the architecture.
 
----
+#### D. File Fragmentation
+- **Problem**: Fragmenting logic into dozens of 5-line files forces excessive `view_file` calls.
+- **Rule**: Consolidate tightly coupled utilities into cohesive modules.
 
-## AI Comfort Report Format
-
-Present a clean report detailing how well the codebase supports AI developer agents:
+### 3. Present the AI Comfort Report
 
 ### AI Comfort & Token Economy Scorecard
 
-#### A. Performance Metrics
+#### Performance Metrics
 - **Discoverability**: [Excellent / Moderate / Poor]
 - **Search Efficiency**: [Clean / Warning: Untracked Build Folders Found]
 - **Nesting Overhead**: [Flat: 1-2 hops / Deep: 4+ hops required]
 
-#### B. Identified AI Friction Points
+#### Identified AI Friction Points
 | File/Folder | Friction Type | Description | Recommended AI-Optimization |
 |---|---|---|---|
-| *e.g., Root* | Search Bloat | Missing `.next/` in `.gitignore` | Add `/ .next/` to ignore to prevent grep bloat. |
+| *e.g., Root* | Search Bloat | Missing `.next/` in `.gitignore` | Add `.next/` to ignore to prevent grep bloat. |
 | *e.g., `src/utils/`* | High Hops | Nested single-file folders | Flatten to reduce file loading hops. |
 
-#### C. AI Optimization Plan
-Suggest a prioritized list of refactoring steps to reduce agent search time and context consumption.
+#### AI Optimization Plan
+Provide clear refactoring steps to reduce agent search time and context consumption.

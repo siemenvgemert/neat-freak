@@ -1,52 +1,39 @@
 ---
 name: neat-freak-review
-description: Reviews changes or proposed codebases to verify that all new or modified files are placed correctly according to Neat Freak principles. Trigger this skill when the user asks to review changes, check file placement, verify a git diff, or check if directory organization is correct before committing.
+description: Reviews added, modified, or staged files to verify layout compliance (no root source files, nesting limits) before commits.
 ---
 
 # Neat Freak Review Skill
 
-You are a strict code layout reviewer. When this skill is active, you MUST review the newly added, modified, or proposed files in the workspace (using git diff, git status, or comparing file listings) to verify their placement.
+You are a strict code layout reviewer. When this skill is active, you MUST review newly added, modified, or proposed files in the workspace to verify their placement before commits.
 
-## Review Guidelines
+## Fast-Path Execution (1-Turn)
 
-Examine each new or moved file against these constraints:
+### 1. Run the Placement Checker
+Execute the dedicated review script or MCP tool:
+- **CLI Fast-Path (Recommended)**: Run `python ~/.gemini/config/plugins/neat-freak/scripts/pre_commit_check.py --table --working-tree`
+- **MCP Fast-Path**: Call `review_layout(workspace_path="...")`
 
-### 1. Root Pollution Check
-- **No source files in root**: Source code files (e.g., `.js`, `.py`, `.go`, `.rs`) must live inside their designated application folders (`src/`, `app/`, `internal/`, `cmd/`, etc.).
-- **Only global configuration in root**: The root directory should only contain global package managers (`package.json`, `Cargo.toml`, `pyproject.toml`), ignore files (`.gitignore`), readmes, and top-level settings configs.
+The checker evaluates staged or modified files in milliseconds against these constraints:
+1. **Root Pollution**: Zero source files in root (`.py`, `.ts`, `.js`, `.go`, `.rs`, etc.). Only global configs, README, and ignore files.
+2. **Nesting Limits**: Paths must not exceed depth limits (<=4 levels in Standard mode, <=3 levels in OCD mode).
+3. **Cross-Platform Casing**: Evaluates casing conventions (`snake_case` for Python/Rust, `kebab-case` for TS/JS, lowercase single words for Go).
 
-### 2. Nesting Check (YAGNI)
-- **Directory Nesting Depth**: Check if any new folders create paths deeper than 4 levels.
-- **Flattening Opportunities**: If a folder contains only one child directory or file, recommend flattening it (moving the child up and deleting the parent).
-
-### 3. Comment Documentation Check
-- Check if the agent applied the Ponytail simplicity rules. If any components or integrations were omitted/simplified, verify if they were documented with a `ponytail:` prefix comment in the code (e.g., `# ponytail: in-memory DB used to keep structure simple`).
-
-### 4. File Naming & Casing Check
-- **Casing Standards**: Check if the filenames follow tech stack conventions:
-  - Python/Rust: `snake_case` (e.g. `user_service.py`).
-  - Go: Lowercase single words (e.g. `router.go`).
-  - TS/JS/HTML/CSS: `kebab-case` (e.g. `user-card.ts`, `globals.css`), except React components (`PascalCase`).
-- **Description Quality**: Flag generic names (like `helper.py`, `stuff.ts`) or redundant names containing their parent folder (like `models/user_model.py` instead of `models/user.py`).
-
----
-
-## Review Output Format
-
-Provide a neat markdown table listing all new or modified files and their placement evaluation:
+### 2. Present the Placement Review Table
+Output the review table directly to the user:
 
 ### Neat Freak Placement Review
 
-| File Path | Status | Finding / recommendation |
+| File Path | Status | Finding / Recommendation |
 |---|---|---|
-| *e.g., `app/main.py`* | **PASS** | Correctly placed in application source folder. |
-| *e.g., `test.py`* | **FAIL** | Stray file in root. Move to `tests/test_health.py`. |
+| `src/app.py` | **PASS** | Correctly placed in application source folder. |
+| `test.py` | **FAIL** | Stray source file in root. Move into `tests/test_app.py`. |
 
 ### Summary Checklist:
 - `[ ]` No source files sit in root.
-- `[ ]` Directory nesting is 4 levels or shallower.
+- `[ ]` Directory nesting is 4 levels or shallower (3 in OCD mode).
 - `[ ]` No single-file folders exist.
-- `[ ]` Any layout simplifications are documented with `ponytail:` comments.
+- `[ ]` Layout simplifications are documented with `ponytail:` comments.
 - `[ ]` Filenames follow tech stack casing standards and use descriptive names.
 
-If any file fails the review, recommend the exact moves (e.g., `mv` commands) required to clean up the workspace before the user commits their changes.
+If any file fails the review, recommend the exact moves (`mv`) required to resolve the violation before committing.
